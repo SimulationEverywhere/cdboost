@@ -1,0 +1,8 @@
+First subset of files: PDEVS
+-- Using double in PDEVS produces incorrect simulation results, replace by the right datatype in the tests after implementing it.
+-- Implement a general runner to replace the one per formalism we currently have.
+-- Add debug mode: use boost.log to output message exchange and state changes.
+-- Check how to define a parsing model using spirit.
+-- Replace the vector<MSG> by BAG<MSG> in PDEVS.
+-- Add option to runner to select the FEL, using nullqueue by default now.
+-- Upload the documentation

@@ -1,0 +1,15 @@
+cdproto.xcodeproj
+.project
+.cproject
+*.o
+*~
+.kdev4/
+cdboost.config
+cdboost.creator
+cdboost.creator.user
+cdboost.files
+cdboost.includes
+cdboost.kdev4
+*.log
+build
+.DS_Store

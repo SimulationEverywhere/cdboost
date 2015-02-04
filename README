@@ -1,0 +1,18 @@
+Install
+-- The library is headers only. 
+-- It is enough to put the include directory in the path the compiler looks up for them.
+
+Requirements
+-- Boost.Test (To run the tests)
+-- Boost.Any
+-- Boost.Rational (for examples only)
+
+Makefiles
+-- To build examples and tests use b2 tool from Boost.
+
+Starting up
+-- Build the examples.
+-- Start looking at the clock example, it is the easiest one.
+-- To read input from files a fstream can be passed to the p_istream model.
+-- Advanced example of the p_istream model use can be found in main-custom-event-list.
+-- In pdevstone example we show how coupling models can be done using input and programming.
