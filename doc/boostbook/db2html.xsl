@@ -16,7 +16,7 @@ Override boost book implemenation of header.navigation with our own
         <td valign = "top">
             <img href="index.html" height="164px" src="pre-boost.jpg" alt="Library Documentation Index" />
         </td>
-        <td><h2>Safe Numerics</h2></td>
+        <td><h2>Simulation</h2></td>
     </tr></table>
     <xsl:call-template name = "navbar.spirit">
        <xsl:with-param name = "prev" select = "$prev"/>
