@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE library PUBLIC "-//Boost//DTD BoostBook XML V1.1//EN"
+"http://www.boost.org/tools/boostbook/dtd/boostbook.dtd">
+<library dirname="simulation" id="simulation"
+         last-revision="$Date: 2015-02-09$" name="Simulation"
+         url="cdboost.gforge.inria.fr">
+  <title><libraryname
+  last-revision="2015-02-09">Simulation</libraryname></title>
+
+  <libraryinfo>
+    <author>
+      <firstname>Damián</firstname>
+
+      <surname>Vicino</surname>
+    </author>
+
+    <copyright>
+      <year>2013-2015</year>
+
+      <holder>Carleton University</holder>
+
+      <holder>Universite de Nice Sophia Antipolis</holder>
+    </copyright>
+
+    <legalnotice>
+      <para><ulink
+      url="https://gforge.inria.fr/docman/view.php/6779/10332/BSD-LICENSE.txt">BSD
+      License</ulink></para>
+    </legalnotice>
+
+    <librarypurpose>Multi formalism simulation</librarypurpose>
+
+    <librarycategory name="">Formal Methods</librarycategory>
+  </libraryinfo>
+
+  <section>
+    <title id="libraryname.introduction">Introduction</title>
+
+    <para>Give the information for a potential user to determine whether he
+    can benefit from this library</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>What the library is does.</para>
+      </listitem>
+
+      <listitem>
+        <para>What problems will this library solve?</para>
+      </listitem>
+
+      <listitem>
+        <para>Perhaps some short examples to support the above</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title id="libraryname.tutorial">Tutorial</title>
+
+    <para>One more annotated examples on how the library can be helpful to
+    solve real problems.</para>
+  </section>
+
+  <section>
+    <title id="libraryname.notes">Notes</title>
+
+    <para>Ancillary information that the user needs to use this library. This
+    may include the following:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>non-obvious requirements and dependencies</para>
+      </listitem>
+
+      <listitem>
+        <para>how to install, build and test the library</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+
+  <section>
+    <title id="libraryname.concepts">Concepts</title>
+
+    <para/>
+  </section>
+
+  <section>
+    <title id="libraryname.types">Types</title>
+
+    <para/>
+  </section>
+
+  <section>
+    <title>Functions</title>
+
+    <para/>
+  </section>
+
+  <section>
+    <title id="libraryname.rationale">Rationale</title>
+
+    <qandaset>
+      <qandaentry>
+        <question>
+          <para>Why does ....?</para>
+        </question>
+
+        <answer>
+          <para>Because ...</para>
+        </answer>
+      </qandaentry>
+    </qandaset>
+  </section>
+
+  <section>
+    <title id="libraryname.changelog">Change Log</title>
+
+    <para/>
+  </section>
+
+  <section>
+    <title id="libraryname.acknowledgements">Acknowledments</title>
+
+    <para/>
+  </section>
+
+  <section>
+    <title id="libraryname.references">References</title>
+
+    <para/>
+  </section>
+</library>
