@@ -36,20 +36,6 @@
   <section id="simulation.introduction">
     <title id="libraryname.introduction">Introduction</title>
 
-    <itemizedlist>
-      <listitem>
-        <para>This libraryWhat the library is does.</para>
-      </listitem>
-
-      <listitem>
-        <para>What problems will this library solve?</para>
-      </listitem>
-
-      <listitem>
-        <para>Perhaps some short examples to support the above</para>
-      </listitem>
-    </itemizedlist>
-
     <section>
       <title>Motivation</title>
 
@@ -62,7 +48,7 @@
       <para>To improve collaboration, sharing, and reuse about the models and
       simulations developed, several modelling formalisms had been proposed.
       Most of them can be grouped in families that use similar algorithms and
-      data structures with slight differences. </para>
+      data structures with slight differences.</para>
 
       <para>For the most popular formalisms, there are several implementations
       developed in various languages and platforms in the last few
@@ -74,7 +60,7 @@
       models need to be combined into a larger model using a common ground
       formalism. For this purpose multi-formalism modeling and simulation is
       used. For doing so, a common model ans simulation formalism needs to be
-      used. </para>
+      used.</para>
 
       <para>The Discrete-Event System Specification (DEVS) family of formalism
       has being proven to be expressive enough to cover every other DES
@@ -87,8 +73,7 @@
 
       <para><itemizedlist>
           <listitem>
-            <para>Provide basic datatypes commonly used in DES M&amp;S.
-            </para>
+            <para>Provide basic datatypes commonly used in DES M&amp;S.</para>
 
             <para>i.e. Future Event List, Time, etc.</para>
           </listitem>
@@ -132,7 +117,7 @@
 
     <para>We chose the Generator model as the first to explain because of its
     simplicity. This model defined in every DEVS M&amp;S book in detail and it
-    one of the easiest expresable models in DES.</para>
+    one of the easiest expressible models in DES.</para>
 
     <para>The Generator is a periodic model that generates an output after a
     fixed amount of time.</para>
@@ -145,7 +130,7 @@
 
     <para>In PDEVS, models can be defined as atomic when they describe a
     behavior or coupled when they define a composition and interaction between
-    other models. </para>
+    other models.</para>
 
     <para>In the case of Generator we will define an PDEVS atomic
     model.</para>
@@ -212,13 +197,20 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
     double next = r.runUntil(7200); // The function returns the time of the next expected output.</programlisting>
 
     <para>A more detailed implementation of the clock simulation can be found
-    in the examples folder.</para>
+    in the examples folder, it can be browsed online <ulink
+    url="main-clock.cpp">HERE</ulink>.</para>
   </section>
 
   <section id="simulation.notes">
     <title id="libraryname.notes">Notes</title>
 
-    <para>Simulation is a headers only library with few requirements:</para>
+    <para>Simulation is a headers-only library with few requirements:</para>
+
+    <para><itemizedlist>
+        <listitem>
+          <para>Library requires C++11.</para>
+        </listitem>
+      </itemizedlist></para>
 
     <para><itemizedlist>
         <listitem>
@@ -228,30 +220,24 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
 
     <itemizedlist>
       <listitem>
-        <para>Models require two template paramenters, they define Time and a
+        <para>Models require two template parameters, they define Time and a
         Message representation.</para>
 
         <para>In a single simulation, every model needs to use the same Time
-        and Message representation. </para>
+        and Message representation.</para>
       </listitem>
     </itemizedlist>
 
     <itemizedlist>
       <listitem>
         <para>On cases where different message types are needed, the message
-        type boost::any is suggested.</para>
+        type Boost.Any is suggested</para>
       </listitem>
     </itemizedlist>
 
     <itemizedlist>
       <listitem>
-        <para>Library requires C++11. </para>
-      </listitem>
-    </itemizedlist>
-
-    <itemizedlist>
-      <listitem>
-        <para>When used in Windows, "vector" based contructors is required in
+        <para>When used in Windows, "vector" based constructors is required in
         place of using initialization-lists because a lack of support in
         current compiler. These alternative constructors are provided.</para>
       </listitem>
@@ -269,14 +255,15 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
     <itemizedlist>
       <listitem>
         <para>Examples have some extra dependencies, including
-        "program_options", "any", "rational".</para>
+        Boost.ProgramOptions, Boost.Any, Boost.Rational.</para>
       </listitem>
     </itemizedlist>
 
     <itemizedlist>
       <listitem>
-        <para>Tests use boost::test and require the compiled version to run,
-        also they depend in "any" and "rational".</para>
+        <para>Tests are implemented using Boost.Test and require the compiled
+        version to run, also they depend in Boost.Any and
+        Boost.Rational.</para>
       </listitem>
     </itemizedlist>
   </section>
@@ -308,7 +295,7 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
       and Zi,j defines the i-to-j output translation for each j in Ii. The
       whole DN specification follows the Classic coupled DEVS specification
       except for the Select function. PDEVS has two established simulation
-      algorithm, one that doesn’t have ports by Chow [2] and one that supports
+      algorithm, one that doesn't have ports by Chow [2] and one that supports
       ports by Zeigler [1].</para>
     </section>
 
@@ -319,13 +306,13 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
       those provided by Zeigler for classic DEVS[1]. These algorithms are
       classified as Simulator algorithms when they simulate an atomic model,
       and Coordinator algorithms for the simulation of coupled models. We
-      mantained this distinction when there is no significant penalty in the
+      maintained this distinction when there is no significant penalty in the
       performance.</para>
 
       <para>We also define a runner to handle the global details of the
       simulation and create the necessary Simulators, Coordinators and model
       transformations at the time of running th simulation. The runner details
-      include deciding if running in debuging mode, how to handle the output,
+      include deciding if running in debugging mode, how to handle the output,
       and when to stop the simulation.</para>
     </section>
   </section>
@@ -347,7 +334,7 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
 
       <para>It requires the five functions defined in the formalism: internal
       transition, external transition, confluent transition, time advance and
-      output. </para>
+      output.</para>
 
       <para>Functions receive and send bags of messages, that momentarily, are
       defined as std::vectors.</para>
@@ -358,11 +345,11 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
 
       <para>This type defines the coupled models for PDEVS formalism.</para>
 
-      <para>Two flavors are implemented, common coupled and flatened coupled.
+      <para>Two flavors are implemented, common coupled and flattened coupled.
       The difference between them is how the internal representation is
       handled. They are equivalent in the formalism, but they may have
       different performance depending the model being simulated. Deciding
-      which to use is the user responsability.</para>
+      which to use is the user responsibility.</para>
 
       <para>For coupling, shared pointers to models are used, first to define
       the list of models and then to define the relation between them.</para>
@@ -377,12 +364,12 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
       advance of all these coordinators and simulators to provide its own
       outputs. The implementation of the simulation algorithms is sequential
       and non-optimistic. There is never a rollback. Each call to
-      advanceSimulation advances internally a step and outputs are collected
-      in separate method. </para>
+      advance_simulation advances internally a step and outputs are collected
+      in separate method.</para>
 
       <para>The Future Event List structure is a template parameter and any
       type compatible with priority_queue interface is accepted. Alternatively
-      a roundrobin pooling can be used by choosing nullqueue FEL.</para>
+      a round-robin pooling can be used by choosing null queue FEL.</para>
     </section>
 
     <section>
@@ -408,8 +395,8 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
         <title>generator</title>
 
         <para>This model was described in the Tutorial, it outputs a message
-        periodicly every X time. The constructor allows to define the message
-        to be output and the period of repeating the output.</para>
+        periodically every X time. The constructor allows to define the
+        message to be output and the period of repeating the output.</para>
       </section>
 
       <section>
@@ -425,7 +412,7 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
         <title>processor</title>
 
         <para>This model has an internal queue of jobs, each job takes a fixed
-        ammount of time to be executed and dequeued.</para>
+        amount of time to be executed and dequeued.</para>
 
         <para>A message received is a job and it is processed as soon as it
         gets first in the queue. The queue follows FIFO policy.</para>
@@ -438,7 +425,7 @@ runner&lt;double, string&gt; r(clock, // The model to simulate.
         an istream and outputs them accordingly.</para>
 
         <para>The model receives 4 template parameters, the first 2 are time
-        and message as always, the following 2 are the datatypes to be
+        and message as always, the following 2 are the data types to be
         extracted from the istream that will be converted to TIme and Message
         afterward.</para>
 
@@ -500,7 +487,7 @@ std::shared_ptr&lt;pdevs::atomic&lt;typename MODEL::time_type, typename MODEL::m
       <listitem>
         <para>[1] B. P. Zeigler, H. Praehofer and T. G. Kim, Theory of
         modeling and simulation: integrating discrete event and continuous
-        complex dynamic systems, Academic press, 2000. </para>
+        complex dynamic systems, Academic press, 2000.</para>
       </listitem>
     </itemizedlist>
 
@@ -509,7 +496,7 @@ std::shared_ptr&lt;pdevs::atomic&lt;typename MODEL::time_type, typename MODEL::m
         <para>[2] A. C. Chow, “Parallel DEVS: A parallel, hierarchical,
         modular modeling formalism and its distributed simulator,”
         TRANSACTIONS of the Society for Computer Simulation, vol. 13, no. 2,
-        pp. 55-68, 1996. </para>
+        pp. 55-68, 1996.</para>
       </listitem>
     </itemizedlist>
 
@@ -524,7 +511,7 @@ std::shared_ptr&lt;pdevs::atomic&lt;typename MODEL::time_type, typename MODEL::m
           <para>A. Muzy and J. J. Nutaro, “Algorithms for efficient
           implementations of the DEVS &amp; DSDEVS abstract simulator,” in 1st
           Open International Conference on Modeling &amp; Simulation (OICMS),
-          2005. </para>
+          2005.</para>
         </listitem>
       </itemizedlist><itemizedlist>
         <listitem>
@@ -537,7 +524,7 @@ std::shared_ptr&lt;pdevs::atomic&lt;typename MODEL::time_type, typename MODEL::m
           for studying performance of DEVS modeling and simulation
           environments,” in Distributed Simulation and Real-Time Applications,
           2005. DS-RT 2005 Proceedings. Ninth IEEE International Symposium on,
-          2005. </para>
+          2005.</para>
         </listitem>
       </itemizedlist><itemizedlist>
         <listitem>
@@ -555,7 +542,7 @@ std::shared_ptr&lt;pdevs::atomic&lt;typename MODEL::time_type, typename MODEL::m
       </itemizedlist><itemizedlist>
         <listitem>
           <para>E. A. Lee, "The problem with threads," Computer, vol. 39, no.
-          5, pp. 33-42, 2006. </para>
+          5, pp. 33-42, 2006.</para>
         </listitem>
       </itemizedlist><itemizedlist>
         <listitem>
@@ -578,12 +565,12 @@ std::shared_ptr&lt;pdevs::atomic&lt;typename MODEL::time_type, typename MODEL::m
         <listitem>
           <para>J. Himmelspach and A. M. Uhrmacher, "The event queue problem
           and PDevs," in Proceedings of the 2007 spring simulation
-          multiconference-Volume 2, 2007. </para>
+          multiconference-Volume 2, 2007.</para>
         </listitem>
       </itemizedlist><itemizedlist>
         <listitem>
           <para>B. Karlsson, Beyond the C++ standard library: an introduction
-          to boost, Pearson Education, 2005. </para>
+          to boost, Pearson Education, 2005.</para>
         </listitem>
       </itemizedlist></para>
   </section>

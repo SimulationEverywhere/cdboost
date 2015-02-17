@@ -125,11 +125,11 @@ public:
                 coupled<TIME, MSG>::_desc.models.push_back(model);
             } else { //a coupled
                 //inserting internal models
-                for (auto& submodel : m_coupled->getDescription().models){
+                for (auto& submodel : m_coupled->get_description().models){
                     coupled<TIME, MSG>::_desc.models.push_back(submodel);
                 }
                 //mantaining internal coups in submodels
-                for (auto& subic : m_coupled->getDescription().internal_coupling){
+                for (auto& subic : m_coupled->get_description().internal_coupling){
                     coupled<TIME, MSG>::_desc.internal_coupling.push_back(subic);
                 }
             }
@@ -140,7 +140,7 @@ public:
             if ( m_coupled == nullptr){ //an atomic
                 coupled<TIME, MSG>::_desc.external_input_coupling.push_back(in);
             } else {
-                for (auto& subin : m_coupled->getDescription().external_input_coupling){
+                for (auto& subin : m_coupled->get_description().external_input_coupling){
                     coupled<TIME, MSG>::_desc.external_input_coupling.push_back(subin);
                 }
             }
@@ -151,7 +151,7 @@ public:
             if ( m_coupled == nullptr){ //an atomic
                 coupled<TIME, MSG>::_desc.external_output_coupling.push_back(out);
             } else {
-                for (auto& subout : m_coupled->getDescription().external_output_coupling){
+                for (auto& subout : m_coupled->get_description().external_output_coupling){
                     coupled<TIME, MSG>::_desc.external_output_coupling.push_back(subout);
                 }
             }
@@ -164,18 +164,18 @@ public:
                 if (m_right == nullptr) { //and right is an atomic
                     coupled<TIME, MSG>::_desc.internal_coupling.push_back(coupling);
                 } else { //and right is a coupled
-                    for (auto& right_in : m_right->getDescription().external_input_coupling){
+                    for (auto& right_in : m_right->get_description().external_input_coupling){
                         coupled<TIME, MSG>::_desc.internal_coupling.push_back({coupling.first, right_in});
                     }
                 }
             } else { // left is a coupled
                 if (m_right == nullptr){ //and right is atomic
-                    for (auto& subout : m_left->getDescription().external_output_coupling){
+                    for (auto& subout : m_left->get_description().external_output_coupling){
                         coupled<TIME, MSG>::_desc.internal_coupling.push_back({subout, m_right});
                     }
                 } else { // and right is coupled
-                    for (auto& left_out : m_left->getDescription().external_output_coupling){
-                        for (auto& right_in : m_right->getDescription().external_input_coupling){
+                    for (auto& left_out : m_left->get_description().external_output_coupling){
+                        for (auto& right_in : m_right->get_description().external_input_coupling){
                             coupled<TIME, MSG>::_desc.internal_coupling.push_back({left_out, right_in});
                         }
                     }
@@ -202,11 +202,11 @@ public:
                 coupled<TIME, MSG>::_desc.models.push_back(model);
             } else { //a coupled
                 //inserting internal models
-                for (auto& submodel : m_coupled->getDescription().models){
+                for (auto& submodel : m_coupled->get_description().models){
                     coupled<TIME, MSG>::_desc.models.push_back(submodel);
                 }
                 //mantaining internal coups in submodels
-                for (auto& subic : m_coupled->getDescription().internal_coupling){
+                for (auto& subic : m_coupled->get_description().internal_coupling){
                     coupled<TIME, MSG>::_desc.internal_coupling.push_back(subic);
                 }
             }
@@ -217,7 +217,7 @@ public:
             if ( m_coupled == nullptr){ //an atomic
                 coupled<TIME, MSG>::_desc.external_input_coupling.push_back(in);
             } else {
-                for (auto& subin : m_coupled->getDescription().external_input_coupling){
+                for (auto& subin : m_coupled->get_description().external_input_coupling){
                     coupled<TIME, MSG>::_desc.external_input_coupling.push_back(subin);
                 }
             }
@@ -228,7 +228,7 @@ public:
             if ( m_coupled == nullptr){ //an atomic
                 coupled<TIME, MSG>::_desc.external_output_coupling.push_back(out);
             } else {
-                for (auto& subout : m_coupled->getDescription().external_output_coupling){
+                for (auto& subout : m_coupled->get_description().external_output_coupling){
                     coupled<TIME, MSG>::_desc.external_output_coupling.push_back(subout);
                 }
             }
@@ -241,18 +241,18 @@ public:
                 if (m_right == nullptr) { //and right is an atomic
                     coupled<TIME, MSG>::_desc.internal_coupling.push_back(coupling);
                 } else { //and right is a coupled
-                    for (auto& right_in : m_right->getDescription().external_input_coupling){
+                    for (auto& right_in : m_right->get_description().external_input_coupling){
                         coupled<TIME, MSG>::_desc.internal_coupling.push_back({coupling.first, right_in});
                     }
                 }
             } else { // left is a coupled
                 if (m_right == nullptr){ //and right is atomic
-                    for (auto& subout : m_left->getDescription().external_output_coupling){
+                    for (auto& subout : m_left->get_description().external_output_coupling){
                         coupled<TIME, MSG>::_desc.internal_coupling.push_back({subout, m_right});
                     }
                 } else { // and right is coupled
-                    for (auto& left_out : m_left->getDescription().external_output_coupling){
-                        for (auto& right_in : m_right->getDescription().external_input_coupling){
+                    for (auto& left_out : m_left->get_description().external_output_coupling){
+                        for (auto& right_in : m_right->get_description().external_input_coupling){
                             coupled<TIME, MSG>::_desc.internal_coupling.push_back({left_out, right_in});
                         }
                     }
