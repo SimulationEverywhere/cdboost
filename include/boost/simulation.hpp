@@ -32,7 +32,7 @@
 #include <boost/simulation/pdevs/coupled.hpp>
 #include <boost/simulation/pdevs/runner.hpp>
 #include <boost/simulation/convenience.hpp>
-#include <boost/simulation/pdevs/basic_models/istream.hpp>
+#include <boost/simulation/pdevs/basic_models/input_stream.hpp>
 
 
 #endif // BOOST_SIMULATION_HPP

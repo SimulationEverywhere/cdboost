@@ -36,7 +36,7 @@ namespace simulation {
 namespace pdevs {
 namespace basic_models {
 /**
- * @brief istream PDEVS Model.
+ * @brief input_stream PDEVS Model.
  *
  * istream PDEVS Model plays a history of events received by an input stream.
  * The list of events allows to be used as a connector to external tools.
@@ -44,7 +44,7 @@ namespace basic_models {
  *
 */
 template<class TIME, class MSG, class T=int, class M=int> //T and M are the type expected to be read from the ISTREAM
-class istream : public atomic<TIME, MSG>
+class input_stream : public atomic<TIME, MSG>
 {
     std::shared_ptr<std::istream> _ps; //the stream
     TIME _last;
@@ -93,12 +93,12 @@ class istream : public atomic<TIME, MSG>
 
 public:
     /**
-     * @brief istream constructor sets the stream to be read and the initial time
+     * @brief input_stream constructor sets the stream to be read and the initial time
      * @param pis is a pointer to the input stream to be read
      * @param init is the time the simulation of the model starts, the input MUST have absolute times greater than init time.
      */
-    explicit istream(std::shared_ptr<std::istream> pis, TIME init) noexcept :
-        istream(pis, init,
+    explicit input_stream(std::shared_ptr<std::istream> pis, TIME init) noexcept :
+        input_stream(pis, init,
             [](const std::string& s, TIME& t_next, MSG& m_next){
                             T tmp_next;
                             M tmp_next_out;
@@ -115,12 +115,12 @@ public:
                     )
     {}
     /**
-     * @brief istream constructor sets the stream to be read and the initial time and a custom parser
+     * @brief input_stream constructor sets the stream to be read and the initial time and a custom parser
      * @param pis is a pointer to the input stream to be read
      * @param init is the time the simulation of the model starts, the input MUST have absolute times greater than init time.
      * @param process the process to parse each line of input and extract time and messages
      */
-    explicit istream(std::shared_ptr<std::istream> pis, TIME init, decltype(_process) process)  noexcept : _ps{pis}, _last{init}, _process(process) {
+    explicit input_stream(std::shared_ptr<std::istream> pis, TIME init, decltype(_process) process)  noexcept : _ps{pis}, _last{init}, _process(process) {
         std::string line;
         std::getline(*_ps, line); //needs at least one call to detect eof
         if (_ps->eof() && line.empty()){
