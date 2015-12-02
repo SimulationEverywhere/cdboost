@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-2015, Damian Vicino, Daniella Niyonkuru
+ * Modified by Daniella Niyonkuru for the Embedded CDBoost version
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -33,7 +34,8 @@
 
 #include <boost/simulation/pdevs/coupled.hpp>
 #include <boost/any.hpp>
-
+#include "SWO.h"
+#include "mbed.h"
 
 namespace boost {
 namespace simulation {
@@ -211,6 +213,11 @@ public:
      */
     void advanceSimulation(const TIME& t) noexcept { //bag of input was collected in _inbox internal var.
         //if model is simulated in this coordinator
+    	// For debug purposes only
+    	/*
+    	SWO_PrintString((_model->asString()).c_str());
+    	SWO_PrintString(" - Advance Execution Call \n");
+    	*/
         if (_model != nullptr){
             assert(t >= _last);
             assert(t <= _next );
@@ -293,6 +300,11 @@ public:
     }
 
     std::vector<MSG> collectOutputs(const TIME& t) noexcept {
+    	// For debug purposes only
+    	/*
+    	SWO_PrintString((_model->asString()).c_str());
+    	SWO_PrintString(" - Collect Outputs Call \n");
+        */
         if (_next != t) return {}; //not my turn
 
         if (_model != nullptr){ return _model->out(); } //atomic model
@@ -431,14 +443,26 @@ public:
         return _next;
     }
     /**
+     * @brief postHardwareEvent adds a message to the inbox of a coordinator. This action is too be triggered by the runner.
+     * @param m is the message to be added to the inbox.
+     * @return void.
+     */
+    void postHardwareEvent(MSG m)noexcept{
+    	_inbox.push_back(m); // considering we are pushing one event now (Embedded CD-Boost)
+    }
+    /**
      * @brief advanceSimulation advances the execution to t, at t introduces the messages into the system (if any).
      * @param t is the time the transition is expected to be run.
      * @return the time until next internal event.
      */
     void advanceSimulation(const TIME& t) noexcept { //bag of input was collected in _inbox internal var.
+    	// For debug purposes only
+    	//SWO_PrintString(" - advance_execution()::");
+
         _processed_advances++; //invalidate cached output
-        //if model is simulated in this coordinator
+        //if model is atomic - this is a simulator -> Execute Simulator algos
         if (_model != nullptr){
+        	_model->print();
             assert(t >= _last);
             assert(t <= _next );
             if (_inbox.empty()){
@@ -446,6 +470,7 @@ public:
                     _model->internal();
                     _last = t;
                     _next = _last + _model->advance();
+                    //SWO_PrintString(("\t model->internal() model->advance(): " + _model->advance().asString() + " \n").c_str());
                 } else {
 //                    throw std::exception();
                     _last = t;
@@ -455,13 +480,16 @@ public:
                     _model->confluence(_inbox, t-_last);
                     _last = t;
                     _next = _last + _model->advance();
+                    //SWO_PrintString("\t model->confluent() model->advance() \n");
                 } else { //external
                     _model->external(_inbox, t-_last);
                     _last = t;
                     _next = _last + _model->advance();
+                    //SWO_PrintString(("\t model->external() model->advance(): " + _model->advance().asString() + " \n").c_str());
                 }
             }
-        } else {  //if coordinator is pure and no model is simulated
+        } else {  ////if model is coupled- this is a pure coordinator -> Execute Coordinator algos
+        	SWO_PrintString("flattop \n");
             assert(t <= _next);
             assert(t >= _last);
             _last = t;
@@ -469,7 +497,7 @@ public:
             std::vector<std::shared_ptr<coordinator<TIME, MSG, nullqueue>>> inminents_external;
             //processing external input into _inboxes
             for (auto& receiver : _external_input_coupling){
-                    if (receiver->next() != _last && receiver->_inbox.size() == 0){
+                    if (receiver->next() != _last && receiver->_inbox.size() == 0){ // was == 0
                         inminents_external.push_back(receiver);
                     }
                     receiver->_inbox.insert(receiver->_inbox.end(), _inbox.begin(), _inbox.end());
@@ -497,6 +525,7 @@ public:
             }
             for (auto& co : inminents_external){
                 co->advanceSimulation(t);
+
             }
             //setting up next variable
             auto next_coord = std::min_element(_subcoordinators.begin(), _subcoordinators.end(),
@@ -507,9 +536,17 @@ public:
     }
 
     std::vector<MSG> collectOutputs(const TIME& t) noexcept {
+    	// For debug purposes only
+    	// SWO_PrintString(" - collect_outputs()::");
+
         if (_next != t) return {}; //not my turn
 
-        if (_model != nullptr){ return _model->out(); } //atomic model
+        //SWO_PrintString(" - collect_outputs()::");
+        if (_model != nullptr){
+        	/*_model->print(); SWO_PrintString("\t model->out() \n");*/
+        	return _model->out();
+        } //atomic model
+        //else { SWO_PrintString("flattop \n");}
 
         //if coordinator of coupled model
         std::vector<MSG> vm;

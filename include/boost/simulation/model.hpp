@@ -28,6 +28,7 @@
 #ifndef BOOST_SIMULATION_MODEL_H
 #define BOOST_SIMULATION_MODEL_H
 #include <limits>
+#include <string>
 
 namespace boost {
 namespace simulation {
@@ -39,7 +40,7 @@ template<class TIME>
 class model {
 public:
     virtual void registerDebugParameters(std::string name) noexcept {}
-    const TIME infinity=std::numeric_limits<TIME>::infinity();
+    const TIME infinity= Time::Inf();
 };
 
 }

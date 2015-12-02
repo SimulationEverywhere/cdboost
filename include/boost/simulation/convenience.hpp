@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-2015, Damian Vicino & Daniella Niyonkuru
+ * Modified by Daniella Niyonkuru (21/7/15 -> Port addition)
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -41,6 +42,12 @@ namespace simulation {
 //create a shared pointer to a pdevs::atomic model
 template<class MODEL, typename... Args>
 std::shared_ptr<pdevs::atomic<typename MODEL::time_type, typename MODEL::message_type>> make_atomic_ptr(Args... args) noexcept {
+    return std::make_shared<MODEL>(std::forward<Args>(args)...);
+}
+
+//create a shared pointer to a hardware port
+template<class MODEL, typename... Args>
+std::shared_ptr<pdevs::port<typename MODEL::time_type, typename MODEL::message_type>> make_port_ptr(Args... args) noexcept {
     return std::make_shared<MODEL>(std::forward<Args>(args)...);
 }
 

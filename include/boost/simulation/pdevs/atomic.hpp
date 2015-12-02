@@ -50,7 +50,9 @@ public:
     using message_type=MSG; //Message suggested for most simulations is boost::any
     using model_type=atomic<TIME, MSG>;
 
-    atomic() noexcept {}
+    atomic() noexcept : modelName("atomic") {}
+
+    atomic(const std::string &name) noexcept : modelName( name ) {}
     /**
      * @brief internal transition function as defined in PDEVS
      */
@@ -79,6 +81,17 @@ public:
      * @param t is the time the message is received
      */
     virtual void confluence(const std::vector<MSG>& mb, const TIME& t) noexcept = 0;
+    /**
+     * @brief asString returns the name of the port
+     */
+	const std::string asString() const { return modelName; }
+    /**
+     * @brief print prints the name of the port - To be implemented by the user
+     */
+	virtual void print() noexcept = 0;
+
+private:
+    std::string modelName;
 };
 
 }
