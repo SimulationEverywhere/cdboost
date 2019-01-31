@@ -95,7 +95,7 @@ public:
 
     	    int portIndex = &ip - &_ports_desc.input_ports[0]; // pos contains the position in the vector
 
-    	    if(Time::currentTime() < previousEventTime[portIndex] + current_port->getPollingPeriod())
+    	    if(TIME::currentTime() < previousEventTime[portIndex] + current_port->getPollingPeriod())
     	    	continue; // Go to the next port - it's not time to poll this port yet ;)
 
     		if(current_port->pDriver(portValue)){
