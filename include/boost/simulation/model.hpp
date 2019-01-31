@@ -40,7 +40,7 @@ template<class TIME>
 class model {
 public:
     virtual void registerDebugParameters(std::string name) noexcept {}
-    const TIME infinity= Time::Inf();
+    const TIME infinity= TIME::Inf();
 };
 
 }
