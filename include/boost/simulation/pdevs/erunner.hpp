@@ -49,7 +49,7 @@ namespace pdevs {
  * conditions, the ending conditions and the loggers, then it runs the simulation and
  * displays the results.
  */
-template <class TIME, class MSG, class VALUE, template<class, class> class FEL=nullqueue>
+template <class TIME, class MSG, template<class, class> class FEL=nullqueue, class VALUE=int>
 class erunner
 {
     TIME _next; //next scheduled event

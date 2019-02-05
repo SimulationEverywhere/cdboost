@@ -39,7 +39,7 @@ namespace pdevs {
 /**
  * @brief The coupled class represents PDEVS coupled models
  */
-template<class TIME, class MSG, class VALUE>
+template<class TIME, class MSG, class VALUE=int>
 class driver
 {
 protected:

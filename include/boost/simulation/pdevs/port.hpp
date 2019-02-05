@@ -42,7 +42,7 @@ namespace pdevs {
  * during execution.
  */
 
-template <class TIME, class MSG, class VALUE>
+template <class TIME, class MSG, class VALUE=int>
 class port : public model<TIME>
 {
 public:
