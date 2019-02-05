@@ -47,7 +47,7 @@ std::shared_ptr<pdevs::atomic<typename MODEL::time_type, typename MODEL::message
 
 //create a shared pointer to a hardware port
 template<class MODEL, typename... Args>
-std::shared_ptr<pdevs::port<typename MODEL::time_type, typename MODEL::message_type>> make_port_ptr(Args... args) noexcept {
+std::shared_ptr<pdevs::port<typename MODEL::time_type, typename MODEL::message_type, typename MODEL::value_type>> make_port_ptr(Args... args) noexcept {
     return std::make_shared<MODEL>(std::forward<Args>(args)...);
 }
 

@@ -39,7 +39,7 @@ namespace pdevs {
 /**
  * @brief The coupled class represents PDEVS coupled models
  */
-template<class TIME, class MSG>
+template<class TIME, class MSG, class VALUE>
 class driver
 {
 protected:
@@ -49,8 +49,8 @@ protected:
 	int numberInputPorts;
 	std::vector<TIME> previousEventTime;
     struct topports_description{
-        std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> input_ports; //port to model
-        std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> output_ports; // model to port
+        std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> input_ports; //port to model
+        std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> output_ports; // model to port
     };
 
     topports_description _ports_desc;
@@ -58,14 +58,14 @@ public:
     using time_type=TIME;
     using message_type=MSG;
     using description_type=topports_description;
-    using Value=int;
+    using value_type=VALUE;
 
 
     /**
      * @brief driver receives the whole port structure by pointers to ports
      */
-    driver( std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> ip,
-		     std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> op
+    driver( std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> ip,
+		     std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> op
           ) noexcept
     {
         _ports_desc.input_ports = ip;
@@ -84,14 +84,14 @@ public:
     }
 
     bool get_hardware_event(MSG& input_message){
-        Value portValue;
+		value_type portValue;
         std::shared_ptr<model<TIME>> to_model;
-        std::shared_ptr<port<TIME,MSG>> current_port;
+        std::shared_ptr<port<TIME,MSG,VALUE>> current_port;
 
 
         bool foundEvent = false;
     	for (auto& ip : _ports_desc.input_ports){
-    	    current_port = std::dynamic_pointer_cast<port<TIME, MSG>>(ip.first);
+    	    current_port = std::dynamic_pointer_cast<port<TIME,MSG,VALUE>>(ip.first);
 
     	    int portIndex = &ip - &_ports_desc.input_ports[0]; // pos contains the position in the vector
 
@@ -127,7 +127,7 @@ public:
     	// SWO_PrintString("DRIVER: OUTPUT MESSAGE \n");
 		output_message.print();
 
-    	Value portValue = output_message.val;
+		value_type portValue = output_message.val;
     	for(auto& op : _ports_desc.output_ports){
     		if(op.first->asString() == port_name){
     			op.first->pDriver(portValue);
