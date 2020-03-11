@@ -49,14 +49,14 @@ namespace pdevs {
  * conditions, the ending conditions and the loggers, then it runs the simulation and
  * displays the results.
  */
-template <class TIME, class MSG, template<class, class> class FEL=nullqueue>
+template <class TIME, class MSG, class VALUE=int>
 class erunner
 {
     TIME _next; //next scheduled event
     std::shared_ptr<coordinator<TIME, MSG, nullqueue>> _coordinator; //ecoordinator of the top level coupled model.
-    std::shared_ptr<driver<TIME, MSG>> _driver; // global driver to manage top ports connected to hardware
-    std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> _input_ports;
-    std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> _output_ports;
+    std::shared_ptr<driver<TIME, MSG, VALUE>> _driver; // global driver to manage top ports connected to hardware
+    std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> _input_ports;
+    std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> _output_ports;
     bool _silent;
 
     void process_output(TIME t, std::vector<MSG>& m) noexcept {
@@ -85,12 +85,12 @@ public:
      */
 
 	 explicit erunner(std::shared_ptr<coupled<TIME, MSG>> cm,
-				std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> ip,
-				std::vector<std::pair<std::shared_ptr<port<TIME,MSG>>, std::shared_ptr<model<TIME>>>> op) noexcept
+				std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> ip,
+				std::vector<std::pair<std::shared_ptr<port<TIME,MSG,VALUE>>, std::shared_ptr<model<TIME>>>> op) noexcept
 	:    _input_ports(ip), _output_ports(op),infinity(cm->infinity)
     {
         for ( auto& inpport : ip){
-            std::shared_ptr<port<TIME, MSG>> in_p = std::dynamic_pointer_cast<port<TIME, MSG>>(inpport.first);
+            std::shared_ptr<port<TIME, MSG, VALUE>> in_p = std::dynamic_pointer_cast<port<TIME, MSG, VALUE>>(inpport.first);
             if ( in_p == nullptr){ //no input port provided
                printf("NULL PTR TO INPUT PORT \n");
              }
@@ -99,7 +99,7 @@ public:
         }
 
         for ( auto& outpport : op){
-            std::shared_ptr<port<TIME, MSG>> out_p = std::dynamic_pointer_cast<port<TIME, MSG>>(outpport.first);
+            std::shared_ptr<port<TIME, MSG, VALUE>> out_p = std::dynamic_pointer_cast<port<TIME, MSG, VALUE>>(outpport.first);
             if ( out_p == nullptr){ //no output port provided
                printf("NULL PTR TO OUTPUT PORT \n");
              }
@@ -107,7 +107,7 @@ public:
             	out_p->print();
         }
         _coordinator.reset(new coordinator<TIME, MSG, nullqueue>{cm});
-        _driver.reset(new driver<TIME,MSG>{ip,op});
+        _driver.reset(new driver<TIME,MSG, VALUE>{ip,op});
         _next = _coordinator->init(TIME(00,00,00,010)); //TIME::currentTime()
         _silent = false;
     }

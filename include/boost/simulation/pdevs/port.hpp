@@ -42,14 +42,14 @@ namespace pdevs {
  * during execution.
  */
 
-template <class TIME, class MSG>
+template <class TIME, class MSG, class VALUE=int>
 class port : public model<TIME>
 {
 public:
     using time_type=TIME;
     using message_type=MSG; //Message suggested for embedded execution is eMessage
-    using model_type=port<TIME, MSG>;
-    using Value=int;
+    using model_type=port<TIME, MSG, VALUE>;
+    using value_type=VALUE;
 
     port(const std::string &name) noexcept :portName( name ), pollingPeriod( TIME(0) ) {}
     port(const std::string &name, const TIME &pollingP) noexcept :portName( name ), pollingPeriod( pollingP ) {}
@@ -57,7 +57,7 @@ public:
     /**
      * @brief pDriver converts received signals into hardware commands or vice-versa - To be implemented by the user
      */
-    virtual bool pDriver(Value&) const noexcept = 0;
+    virtual bool pDriver(value_type&) const noexcept = 0;
     /**
      * @brief asString returns the name of the port
      */
