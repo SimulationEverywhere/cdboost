@@ -34,8 +34,6 @@
 
 #include <boost/simulation/pdevs/coupled.hpp>
 #include <boost/any.hpp>
-#include "SWO.h"
-#include "mbed.h"
 
 namespace boost {
 namespace simulation {
@@ -489,7 +487,6 @@ public:
                 }
             }
         } else {  ////if model is coupled- this is a pure coordinator -> Execute Coordinator algos
-        	SWO_PrintString("flattop \n");
             assert(t <= _next);
             assert(t >= _last);
             _last = t;
