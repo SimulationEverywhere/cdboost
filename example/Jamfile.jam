@@ -1,9 +1,0 @@
-project example
-    : requirements
-        <include>../include
-;
-
-
-exe clock : main-clock.cpp ;
-exe custom-event-list : main-custom-event-list.cpp ;
-exe echobox : main-echobox.cpp ;

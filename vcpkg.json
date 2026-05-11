@@ -1,0 +1,9 @@
+{
+    "name": "cdboost",
+    "version": "0.2.0",
+    "dependencies": [
+        "boost-rational",
+        "catch2",
+        "spdlog"
+    ]
+}

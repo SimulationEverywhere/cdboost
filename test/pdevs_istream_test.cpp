@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-present, Damian Vicino
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -24,156 +24,106 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#define BOOST_TEST_DYN_LINK
-#include <string>
-#include <iostream>
+#include <algorithm>
+#include <any>
+#include <catch2/catch_test_macros.hpp>
+#include <cdboost/pdevs/basic_models/input_stream.hpp>
+#include <cmath>
+#include <memory>
 #include <sstream>
-#include <boost/test/unit_test.hpp>
-#include <boost/any.hpp>
-#include <boost/simulation/pdevs/basic_models/istream.hpp>
-#include <math.h>
+#include <string>
 
-using namespace boost::simulation;
-using namespace boost::simulation::pdevs;
-using namespace boost::simulation::pdevs::basic_models;
-using namespace std;
+using namespace cdboost::pdevs::basic_models;
 
-using Time=double;
-using Message=boost::any;
+using Time    = double;
+using Message = std::any;
 
-BOOST_AUTO_TEST_SUITE( pistream_test_suite )
-BOOST_AUTO_TEST_CASE( pistream_simple_of_single_events_test )
-{
-    //Create a istream with events every second outputing [1..10]
-    //Check that outputs the 10 numbers every 1 second and last one is infinity
-
-    shared_ptr<istringstream> piss{ new istringstream{} };
-    piss->str("0 0");
-    //init
-    istream<Time, Message, int, int> pf{piss, Time(0)};
-    BOOST_CHECK_EQUAL(pf.advance(), Time(0));
-
-    // only message
-    BOOST_REQUIRE_EQUAL(pf.out().size(), 1);
-    BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[0]), 0);
+TEST_CASE("input_stream single event at time 0", "[input_stream]") {
+    auto piss = std::make_shared<std::istringstream>("0 0");
+    input_stream<Time, Message, int, int> pf{piss, Time(0)};
+    CHECK(pf.advance() == Time(0));
+    REQUIRE(pf.out().size() == 1);
+    CHECK(std::any_cast<int>(pf.out()[0]) == 0);
     pf.internal();
-    BOOST_CHECK( isinf(pf.advance()));
+    CHECK(std::isinf(pf.advance()));
 }
 
-BOOST_AUTO_TEST_CASE( pistream_simple_of_multiple_events_test )
-{
-    //Create a istream with events every second outputing [1..10]
-    //Check that outputs the 10 numbers every 1 second and last one is infinity
-
-    shared_ptr<istringstream> piss{ new istringstream{} };
-    piss->str("0 0 \n 0 1 \n 0 2 ");
-    //init
-    istream<Time, Message, int, int> pf{piss, Time(0)};
-    BOOST_CHECK_EQUAL(pf.advance(), Time(0));
-
-    // only output
-    BOOST_REQUIRE_EQUAL(pf.out().size(), 3);
+TEST_CASE("input_stream multiple events at same time", "[input_stream]") {
+    auto piss = std::make_shared<std::istringstream>("0 0 \n 0 1 \n 0 2 ");
+    input_stream<Time, Message, int, int> pf{piss, Time(0)};
+    CHECK(pf.advance() == Time(0));
+    REQUIRE(pf.out().size() == 3);
     pf.internal();
-    BOOST_CHECK( isinf(pf.advance()));
+    CHECK(std::isinf(pf.advance()));
 }
 
-
-BOOST_AUTO_TEST_CASE( pistream_as_generator_of_single_events_test )
-{
-    //Create a istream with events every second outputing [1..10]
-    //Check that outputs the 10 numbers every 1 second and last one is infinity
-
-    shared_ptr<istringstream> piss{ new istringstream{} };
-    piss->str("0 0 \n 1 1 \n 2 2 \n 3 3 \n 4 4 \n 5 5 \n 6 6 \n 7 7 \n 8 8 \n 9 9 \n 10 10");
-    //init
-    istream<Time, Message, int, int> pf{piss, Time(0)};
-    BOOST_CHECK_EQUAL(pf.advance(), Time(0));
-
-    //consume
-    for (int i=0; i < 10 ; i++){
-        BOOST_REQUIRE_EQUAL(pf.out().size(), 1);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[0]), i);
+TEST_CASE("input_stream replays a sequence of single events", "[input_stream]") {
+    auto piss = std::make_shared<std::istringstream>(
+        "0 0 \n 1 1 \n 2 2 \n 3 3 \n 4 4 \n 5 5 \n 6 6 \n 7 7 \n 8 8 \n 9 9 \n 10 10");
+    input_stream<Time, Message, int, int> pf{piss, Time(0)};
+    CHECK(pf.advance() == Time(0));
+    for (int i = 0; i < 10; i++) {
+        REQUIRE(pf.out().size() == 1);
+        CHECK(std::any_cast<int>(pf.out()[0]) == i);
         pf.internal();
-        BOOST_CHECK_EQUAL(pf.advance(), Time(1));
+        CHECK(pf.advance() == Time(1));
     }
-    //last message
-    BOOST_REQUIRE_EQUAL(pf.out().size(), 1);
-    BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[0]), 10);
+    REQUIRE(pf.out().size() == 1);
+    CHECK(std::any_cast<int>(pf.out()[0]) == 10);
     pf.internal();
-    BOOST_CHECK( isinf(pf.advance()));
+    CHECK(std::isinf(pf.advance()));
 }
 
-
-BOOST_AUTO_TEST_CASE( pistream_as_generator_of_multiple_events_test )
-{
-    //Create a istream with events every second outputing [1..10]
-    //Check that outputs the 10 numbers every 1 second and last one is infinity
-
-    shared_ptr<istringstream> piss{ new istringstream{} };
-    piss->str("1 1 \n 1 1 \n 2 2 \n 2 2 \n 3 3 \n 3 3 \n 4 4 \n 4 4 \n 5 5 \n 5 5");
-    //init
-    istream<Time, Message, int, int> pf{piss, Time(0)};
-    BOOST_CHECK_EQUAL(pf.advance(), Time(1));
-    //advance simulation
-    for (int i=1; i < 5; i++){
-        BOOST_REQUIRE_EQUAL(pf.out().size(), 2);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[0]), i);
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[1]), i);
+TEST_CASE("input_stream replays pairs of events at each time step", "[input_stream]") {
+    auto piss = std::make_shared<std::istringstream>(
+        "1 1 \n 1 1 \n 2 2 \n 2 2 \n 3 3 \n 3 3 \n 4 4 \n 4 4 \n 5 5 \n 5 5");
+    input_stream<Time, Message, int, int> pf{piss, Time(0)};
+    CHECK(pf.advance() == Time(1));
+    for (int i = 1; i < 5; i++) {
+        REQUIRE(pf.out().size() == 2);
+        CHECK(std::any_cast<int>(pf.out()[0]) == i);
+        CHECK(std::any_cast<int>(pf.out()[1]) == i);
         pf.internal();
-        BOOST_CHECK_EQUAL(pf.advance(), Time(1));
+        CHECK(pf.advance() == Time(1));
     }
-    //last item
-    BOOST_REQUIRE_EQUAL(pf.out().size(), 2);
-    BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[0]), 5);
-    BOOST_CHECK_EQUAL(boost::any_cast<int>(pf.out()[1]), 5);
+    REQUIRE(pf.out().size() == 2);
+    CHECK(std::any_cast<int>(pf.out()[0]) == 5);
+    CHECK(std::any_cast<int>(pf.out()[1]) == 5);
     pf.internal();
-    BOOST_CHECK( isinf(pf.advance()));
+    CHECK(std::isinf(pf.advance()));
 }
 
-//custom processor of input
-BOOST_AUTO_TEST_CASE( pistream_with_custom_processor_as_generator_of_multiple_events_test )
-{
-    //Create a istream with events every second outputing [1..10]
-    //Check that outputs the 10 numbers every 1 second and last one is infinity
-
-    shared_ptr<istringstream> piss{ new istringstream{} };
-    piss->str("1 hello \n 1 world \n 2 hello \n 2 world");
-    //init
-    istream<Time, Message, int, int> pf{piss, Time(0),
-                [](const string& s, Time& t_next, boost::any& m_next)->void{
-            //intermediary vars for casting
-            int tmp_next;
-            string tmp_next_out;
+TEST_CASE("input_stream uses custom parser to read string messages", "[input_stream]") {
+    auto piss = std::make_shared<std::istringstream>("1 hello \n 1 world \n 2 hello \n 2 world");
+    input_stream<Time, Message, int, int> pf{
+        piss, Time(0), [](const std::string &s, Time &t_next, std::any &m_next) {
+            int tmp_int;
+            std::string tmp_str;
             std::stringstream ss;
             ss.str(s);
-            ss >> tmp_next;
-            t_next = static_cast<Time>(tmp_next);
-            ss >> tmp_next_out;
-            m_next = static_cast<boost::any>(tmp_next_out);
+            ss >> tmp_int;
+            t_next = static_cast<Time>(tmp_int);
+            ss >> tmp_str;
+            m_next = static_cast<std::any>(tmp_str);
             std::string thrash;
             ss >> thrash;
-            if ( 0 != thrash.size()) throw std::exception();
+            if (thrash.size() != 0)
+                throw std::exception();
         }};
-
-    BOOST_CHECK_EQUAL(pf.advance(), Time(1));
-    //advance simulation
-    BOOST_REQUIRE_EQUAL(pf.out().size(), 2);
-    BOOST_CHECK(any_of(pf.out().begin(), pf.out().end(), [](const boost::any& m ){ string s = boost::any_cast<string>(m); return s.compare("hello")==0;}));
-    BOOST_CHECK(any_of(pf.out().begin(), pf.out().end(), [](const boost::any& m ){ string s = boost::any_cast<string>(m); return s.compare("world")==0;}));
+    CHECK(pf.advance() == Time(1));
+    REQUIRE(pf.out().size() == 2);
+    auto has = [&](const std::string &s) {
+        auto out = pf.out();
+        return std::any_of(out.begin(), out.end(),
+                           [&](const std::any &m) { return std::any_cast<std::string>(m) == s; });
+    };
+    CHECK(has("hello"));
+    CHECK(has("world"));
     pf.internal();
-    BOOST_CHECK_EQUAL(pf.advance(), Time(1));
-    //last item
-    BOOST_REQUIRE_EQUAL(pf.out().size(), 2);
-    BOOST_CHECK(any_of(pf.out().begin(), pf.out().end(), [](const boost::any& m ){ string s = boost::any_cast<string>(m); return s.compare("hello")==0;}));
-    BOOST_CHECK(any_of(pf.out().begin(), pf.out().end(), [](const boost::any& m ){ string s = boost::any_cast<string>(m); return s.compare("world")==0;}));
+    CHECK(pf.advance() == Time(1));
+    REQUIRE(pf.out().size() == 2);
+    CHECK(has("hello"));
+    CHECK(has("world"));
     pf.internal();
-    BOOST_CHECK( isinf(pf.advance()));
+    CHECK(std::isinf(pf.advance()));
 }
-
-
-
-
-
-BOOST_AUTO_TEST_SUITE_END()
-

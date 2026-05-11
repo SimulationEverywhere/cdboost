@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install GCC 14
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-14 g++-14
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 100
+
+      - name: Set up vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git $VCPKG_ROOT
+          $VCPKG_ROOT/bootstrap-vcpkg.sh -disableMetrics
+
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/vcpkg/installed
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ runner.os }}-
+
+      - name: Configure
+        run: |
+          cmake -B build \
+            -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Run examples
+        run: |
+          mkdir -p example-output
+          build/example/clock          > example-output/clock.txt
+          build/example/echobox        > example-output/echobox.txt
+          build/example/custom-event-list > example-output/custom-event-list.txt
+
+      - name: Validate example output
+        run: |
+          fail=0
+
+          check_contains() {
+            local file="$1" pattern="$2"
+            if ! grep -qF "$pattern" "$file"; then
+              echo "FAIL $file: missing '$pattern'"
+              fail=1
+            fi
+          }
+          check_lines() {
+            local file="$1" expected="$2"
+            local actual
+            actual=$(wc -l < "$file")
+            if [ "$actual" -ne "$expected" ]; then
+              echo "FAIL $file: expected $expected lines, got $actual"
+              fail=1
+            fi
+          }
+
+          # clock: 7200s rational-time simulation — 3600 seconds + 120 minutes + 2 hours = 7322 ticks
+          # plus 3 model_setup + simulation_start + simulation_end + performance = 7325 lines
+          check_lines   example-output/clock.txt 7325
+          check_contains example-output/clock.txt '"event":"model_setup"'
+          check_contains example-output/clock.txt '"msg":"Creating atomic models for 3 needles"'
+          check_contains example-output/clock.txt '"event":"simulation_start"'
+          check_contains example-output/clock.txt '"event":"tick","msg":"minute"'
+          check_contains example-output/clock.txt '"event":"simulation_end"'
+          check_contains example-output/clock.txt '"event":"performance"'
+
+          # echobox: two echo atomics, 12 tick events + 4 model_setup + start + end + perf = 19 lines
+          check_lines   example-output/echobox.txt 19
+          check_contains example-output/echobox.txt '"msg":"Creating atomic models for the 2 echos"'
+          check_contains example-output/echobox.txt '"event":"simulation_start"'
+          check_contains example-output/echobox.txt '"event":"tick"'
+          check_contains example-output/echobox.txt '"event":"simulation_end"'
+          check_contains example-output/echobox.txt '"event":"performance"'
+
+          # custom-event-list: istream model with hello/world string messages
+          check_lines   example-output/custom-event-list.txt 10
+          check_contains example-output/custom-event-list.txt '"event":"tick","msg":"hello"'
+          check_contains example-output/custom-event-list.txt '"event":"tick","msg":"world"'
+          check_contains example-output/custom-event-list.txt '"event":"simulation_end"'
+
+          if [ "$fail" -ne 0 ]; then
+            echo "One or more output validation checks failed."
+            exit 1
+          fi
+          echo "All output validation checks passed."
+
+      - name: Upload example output
+        uses: actions/upload-artifact@v4
+        with:
+          name: example-output
+          path: example-output/

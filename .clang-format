@@ -1,0 +1,22 @@
+BasedOnStyle: LLVM
+Language: Cpp
+ColumnLimit: 100
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+NamespaceIndentation: All
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+    - Regex: '^<boost/simulation/.*'
+      Priority: 1
+    - Regex: '^<boost/.*'
+      Priority: 2
+    - Regex: '.*'
+      Priority: 3
+AlignConsecutiveAssignments: Consecutive
+AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBraces: Attach
+AccessModifierOffset: -2
+SpaceBeforeParens: ControlStatements

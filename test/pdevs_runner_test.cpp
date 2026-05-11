@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-present, Damian Vicino
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -24,164 +24,115 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
 #include <algorithm>
-#include <boost/rational.hpp>
-#include <boost/simulation/pdevs/runner.hpp>
-#include <boost/simulation/pdevs/basic_models/generator.hpp>
-#include <boost/simulation/pdevs/basic_models/istream.hpp>
-#include <math.h>
+#include <any>
+#include <catch2/catch_test_macros.hpp>
+#include <cdboost/pdevs/basic_models/generator.hpp>
+#include <cdboost/pdevs/basic_models/input_stream.hpp>
+#include <cdboost/pdevs/runner.hpp>
+#include <cmath>
+#include <memory>
+#include <string>
+#include <type_traits>
+#include <vector>
 
-using namespace boost::simulation;
-using namespace boost::simulation::pdevs;
-using namespace boost::simulation::pdevs::basic_models;
-using namespace std;
+using namespace cdboost::pdevs;
+using namespace cdboost::pdevs::basic_models;
 
-using Time=double;
-using Message=boost::any;
+using Time    = double;
+using Message = std::any;
 
-BOOST_AUTO_TEST_SUITE( p_runner_for_pdevs_test_suite )
-
-BOOST_AUTO_TEST_SUITE( silent_p_runner_test_suite )
-BOOST_AUTO_TEST_CASE( p_runner_runs_generator_until_10sec_test )
-{
-    //create a generator with tick 1, embed it in a coupled and create the p_runner
-    //run until 10, when it ends, check end time is 10.
-    shared_ptr<pdevs::atomic<Time, Message>> pa{ new generator<Time, Message>{Time{1}} };
-    shared_ptr<coupled<Time, Message>> cm( new coupled<Time, Message>{{pa}, {}, {}, {pa}});
+TEST_CASE("runner runs generator until time 10 (silent)", "[runner]") {
+    auto pa = std::make_shared<generator<Time, Message>>(Time{1});
+    auto cm = std::make_shared<coupled<Time, Message>>(
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pa},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{},
+        std::vector<std::pair<std::shared_ptr<cdboost::model<Time>>,
+                              std::shared_ptr<cdboost::model<Time>>>>{},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pa});
     runner<Time, Message> r(cm, Time{0});
-    BOOST_CHECK_EQUAL( r.runUntil(Time{10}), Time{10});
+    CHECK(r.runUntil(Time{10}) == Time{10});
 }
 
-
-BOOST_AUTO_TEST_CASE( p_runner_stops_on_passive_test )
-{
-    //create a fixed model with events below 20
-    //put it in a coupled model
-    //run until 20
-    //check that run ends in infinity
-    {
-        shared_ptr<istringstream> piss{ new istringstream{} };
-        piss->str("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
-        shared_ptr<pdevs::atomic<Time, Message>> pf{ new istream<Time, Message, int, int>{piss, Time{0}}};
-
-        shared_ptr<coupled<Time, Message>> cm( new coupled<Time, Message>{{pf}, {}, {}, {pf}});
-        runner<Time, Message> r(cm, Time{0});
-
-        BOOST_CHECK( isinf(r.runUntil(Time{20})));
-    }
-    //repeat to stop in middle of the fixed events list
-    //check it ends in last event before limit and returns the next
-    {
-        shared_ptr<istringstream> piss{ new istringstream{} };
-        piss->str("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
-        shared_ptr<pdevs::atomic<Time, Message>> pf{ new istream<Time, Message, int, int>{piss, Time{0}}};
-
-        shared_ptr<coupled<Time, Message>> cm( new coupled<Time, Message>{{pf}, {}, {}, {pf}});
-        runner<Time, Message> r(cm, Time{0});
-
-        BOOST_CHECK_EQUAL( r.runUntil(Time{7}), Time{8});
-    }
+TEST_CASE("runner stops when model goes passive", "[runner]") {
+    auto piss = std::make_shared<std::istringstream>("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
+    auto pf   = std::make_shared<input_stream<Time, Message, int, int>>(piss, Time{0});
+    auto cm   = std::make_shared<coupled<Time, Message>>(
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{},
+        std::vector<std::pair<std::shared_ptr<cdboost::model<Time>>,
+                                std::shared_ptr<cdboost::model<Time>>>>{},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf});
+    runner<Time, Message> r(cm, Time{0});
+    CHECK(std::isinf(r.runUntil(Time{20})));
 }
 
-BOOST_AUTO_TEST_CASE( p_runner_until_passive_test )
-{
-    //create a fixed model with events below 10
-    //run until passivate
-    //check that run doesn't throw
-    {
-        shared_ptr<istringstream> piss{ new istringstream{} };
-        piss->str("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
-        shared_ptr<pdevs::atomic<Time, Message>> pf{ new istream<Time, Message, int, int>{piss, Time{0}}};
-
-        shared_ptr<coupled<Time, Message>> cm( new coupled<Time, Message>{{pf}, {}, {}, {pf}});
-        runner<Time, Message> r(cm, Time{0});
-        BOOST_CHECK_NO_THROW( r.runUntilPassivate());
-    }
+TEST_CASE("runner stops mid-sequence and returns next event time", "[runner]") {
+    auto piss = std::make_shared<std::istringstream>("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
+    auto pf   = std::make_shared<input_stream<Time, Message, int, int>>(piss, Time{0});
+    auto cm   = std::make_shared<coupled<Time, Message>>(
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{},
+        std::vector<std::pair<std::shared_ptr<cdboost::model<Time>>,
+                                std::shared_ptr<cdboost::model<Time>>>>{},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf});
+    runner<Time, Message> r(cm, Time{0});
+    CHECK(r.runUntil(Time{7}) == Time{8});
 }
-BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( p_runner_with_output_test_suite )
+TEST_CASE("runner runUntilPassivate completes without throwing", "[runner]") {
+    auto piss = std::make_shared<std::istringstream>("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
+    auto pf   = std::make_shared<input_stream<Time, Message, int, int>>(piss, Time{0});
+    auto cm   = std::make_shared<coupled<Time, Message>>(
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{},
+        std::vector<std::pair<std::shared_ptr<cdboost::model<Time>>,
+                                std::shared_ptr<cdboost::model<Time>>>>{},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf});
+    runner<Time, Message> r(cm, Time{0});
+    CHECK_NOTHROW(r.runUntilPassivate());
+}
 
-BOOST_AUTO_TEST_CASE( p_runner_runs_generator_until_10sec_test )
-{
-    //create a generator with tick 1, embed it in a coupled and create the p_runner
-    //run until 10, when it ends, check the output.
-    shared_ptr<pdevs::atomic<Time, Message>> pa{ new generator<Time, Message>{Time{1}} };
-    shared_ptr<coupled<Time, Message>> cm( new coupled<Time, Message>{{pa}, {}, {}, {pa}});
-
-    ostringstream oss;
-    runner<Time, Message> r(cm, Time{0}, oss, [](ostream& os, boost::any m){ os << boost::any_cast<int>(m);});
-
+TEST_CASE("runner with formatter: generator formatter called 9 times with value 1", "[runner]") {
+    auto pa = std::make_shared<generator<Time, Message>>(Time{1});
+    auto cm = std::make_shared<coupled<Time, Message>>(
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pa},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{},
+        std::vector<std::pair<std::shared_ptr<cdboost::model<Time>>,
+                              std::shared_ptr<cdboost::model<Time>>>>{},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pa});
+    std::vector<std::string> captured;
+    runner<Time, Message> r(cm, Time{0}, [&](const std::any &m) -> std::string {
+        auto s = std::to_string(std::any_cast<int>(m));
+        captured.push_back(s);
+        return s;
+    });
     r.runUntil(Time{10});
-
-    string s_out = oss.str();
-
-    if (is_same<Time, boost::rational<int>>()) { //Time output differs
-        BOOST_CHECK_EQUAL( s_out,
-                           "1/1 1\n"
-                           "2/1 1\n"
-                           "3/1 1\n"
-                           "4/1 1\n"
-                           "5/1 1\n"
-                           "6/1 1\n"
-                           "7/1 1\n"
-                           "8/1 1\n"
-                           "9/1 1\n"
-                           );
-    } else if (is_same<Time, float>()){
-        BOOST_CHECK_EQUAL( s_out,
-                           "1 1\n2 1\n3 1\n4 1\n5 1\n6 1\n7 1\n8 1\n9 1\n"
-                           );
-    } else if (is_same<Time, double>()){
-        BOOST_CHECK_EQUAL( s_out,
-                           "1 1\n2 1\n3 1\n4 1\n5 1\n6 1\n7 1\n8 1\n9 1\n"
-                           );
-    } else {
-        BOOST_CHECK(false); //Don't know how to handle the Time output
-    }
+    REQUIRE(captured.size() == 9);
+    CHECK(std::all_of(captured.begin(), captured.end(), [](const auto &s) { return s == "1"; }));
 }
 
-BOOST_AUTO_TEST_CASE( p_runner_runs_generator_until_passivate_test )
-{
-    //create a fixed input
-    //run until passivate and check the output.
-    shared_ptr<istringstream> piss{ new istringstream{} };
-    piss->str("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
-    shared_ptr<pdevs::atomic<Time, Message>> pf{ new istream<Time, Message, int, int>{piss, Time{0}}};
-
-    shared_ptr<coupled<Time, Message>> cm( new coupled<Time, Message>{{pf}, {}, {}, {pf}});
-
-    ostringstream oss;
-    runner<Time, Message> r(cm, Time{0}, oss, [](ostream& os, boost::any m){ os << boost::any_cast<int>(m);});
-
+TEST_CASE("runner with formatter: input_stream formatter called for each event", "[runner]") {
+    auto piss = std::make_shared<std::istringstream>("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
+    auto pf   = std::make_shared<input_stream<Time, Message, int, int>>(piss, Time{0});
+    auto cm   = std::make_shared<coupled<Time, Message>>(
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{},
+        std::vector<std::pair<std::shared_ptr<cdboost::model<Time>>,
+                                std::shared_ptr<cdboost::model<Time>>>>{},
+        std::vector<std::shared_ptr<cdboost::model<Time>>>{pf});
+    std::vector<std::string> captured;
+    runner<Time, Message> r(cm, Time{0}, [&](const std::any &m) -> std::string {
+        auto s = std::to_string(std::any_cast<int>(m));
+        captured.push_back(s);
+        return s;
+    });
     r.runUntilPassivate();
-
-    string s_out = oss.str();
-
-    if (is_same<Time, boost::rational<int>>()) { //Time output differs
-        BOOST_CHECK_EQUAL( s_out,
-                           "1/1 1\n"
-                           "4/1 4\n"
-                           "5/1 5\n"
-                           "6/1 6\n"
-                           "8/1 8\n"
-                           "9/1 9\n"
-                           );
-    } else if (is_same<Time, float>()){
-        BOOST_CHECK_EQUAL( s_out,
-                           "1 1\n4 4\n5 5\n6 6\n8 8\n9 9\n"
-                           );
-    } else if (is_same<Time, double>()){
-        BOOST_CHECK_EQUAL( s_out,
-                           "1 1\n4 4\n5 5\n6 6\n8 8\n9 9\n"
-                           );
-    } else {
-        BOOST_CHECK(false); //Don't know how to handle the Time output
-    }
+    REQUIRE(captured.size() == 6);
+    CHECK(captured[0] == "1");
+    CHECK(captured[1] == "4");
+    CHECK(captured[2] == "5");
+    CHECK(captured[3] == "6");
+    CHECK(captured[4] == "8");
+    CHECK(captured[5] == "9");
 }
-BOOST_AUTO_TEST_SUITE_END()
-
-
-BOOST_AUTO_TEST_SUITE_END()

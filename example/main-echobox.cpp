@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-present, Damian Vicino
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -24,53 +24,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <any>
+#include <cdboost/cdboost.hpp>
+#include <cdboost/pdevs/basic_models/processor.hpp>
+#include <format>
+#include <memory>
+#include <sstream>
+#include <string>
 
-#include <iostream>
-#include <chrono>
-#include <algorithm>
-#include <boost/simulation.hpp>
-#include <boost/simulation/pdevs/basic_models/processor.hpp>
+using namespace cdboost;
+using namespace cdboost::pdevs;
+using namespace cdboost::pdevs::basic_models;
 
-using namespace boost::simulation;
-using namespace boost::simulation::pdevs;
-using namespace boost::simulation::pdevs::basic_models;
-using namespace std;
+// Simulation of an echo box doing 2 echoes of the input.
 
+int main() {
+    cdboost::log::init();
 
-using hclock=chrono::high_resolution_clock;
+    cdboost::log::emit(cdboost::log::level::info, "model_setup",
+                       "Creating atomic models for the 2 echos");
 
-//This example is the simulation of a echo box doing 2 echos of the input.
+    auto echo1 = make_atomic_ptr<processor<double, std::any>, double>(double{1});
+    auto echo2 = make_atomic_ptr<processor<double, std::any>, double>(double{3});
 
-int main(){
-    cout << "Creating the atomic models for the 2 echos" << endl;
-    auto echo1 = make_atomic_ptr<processor<double, boost::any>, double>(double{1}) ; //the second param in make_atomic_ptr template  is the expected type for PProcessor construction.
-    auto echo2 = make_atomic_ptr<processor<double, boost::any>, double>(double{3}) ;
+    cdboost::log::emit(cdboost::log::level::info, "model_setup",
+                       "Coupling: input to echo1, echo1 to echo2, both to output");
 
-    cout << "Coupling the models into the echobox: input to echo1, echo1 to echo2, and both to the output" << endl;
-    shared_ptr<coupled<double, boost::any>> echobox( new coupled<double, boost::any>{{echo1, echo2}, {echo1}, {{echo1, echo2}}, {echo1, echo2}});
+    std::shared_ptr<coupled<double, std::any>> echobox(
+        new coupled<double, std::any>{{echo1, echo2}, {echo1}, {{echo1, echo2}}, {echo1, echo2}});
 
-    cout << "Creating the model to insert the input from stream" << endl;
-    auto piss = make_shared<istringstream>();
+    cdboost::log::emit(cdboost::log::level::info, "model_setup", "Creating input stream model");
+
+    auto piss = std::make_shared<std::istringstream>();
     piss->str("1 1 \n 4 4 \n 5 5 \n 6 6 \n 8 8 \n 9 9 ");
-    auto pf = make_atomic_ptr<istream<double, boost::any, int, int>, shared_ptr<istringstream>, double>(piss, double{0});
+    auto pf = make_atomic_ptr<input_stream<double, std::any, int, int>,
+                              std::shared_ptr<std::istringstream>, double>(piss, double{0});
 
-    cout << "Coupling the echobox to the input" << endl;
-    shared_ptr<coupled<double, boost::any>> root( new coupled<double, boost::any>{{pf, echobox}, {}, {{pf, echobox}}, {echobox}});
+    cdboost::log::emit(cdboost::log::level::info, "model_setup",
+                       "Coupling echobox to input stream");
 
-    cout << "Preparing runner" << endl;
+    std::shared_ptr<coupled<double, std::any>> root(
+        new coupled<double, std::any>{{pf, echobox}, {}, {{pf, echobox}}, {echobox}});
+
     double initial_time{0};
-    runner<double, boost::any> r(root, initial_time, cout, [](ostream& os, boost::any m){ os << boost::any_cast<int>(m);});
-
-    std::cout << "Starting simulation until passivate" << std::endl;
-
-    auto start = hclock::now(); //to measure simulation execution time
+    runner<double, std::any> r(root, initial_time, [](const std::any &m) -> std::string {
+        return std::format("{}", std::any_cast<int>(m));
+    });
 
     r.runUntilPassivate();
-
-    auto elapsed = std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>
-                                                                                          (hclock::now() - start).count();
-
-    cout << "Simulation took:" << elapsed << "sec" << endl;
     return 0;
 }
-

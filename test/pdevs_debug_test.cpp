@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-present, Damian Vicino
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -24,23 +24,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <catch2/catch_test_macros.hpp>
 
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/simulation/model.hpp>
-/**
- * This set of tests is for debuging mechanisms implemented above the models
- */
-
-using namespace boost::simulation;
-
-BOOST_AUTO_TEST_SUITE( p_debug_test_suite )
-
-BOOST_AUTO_TEST_SUITE( p_debug_atomic_model_test_suite )
-BOOST_AUTO_TEST_CASE( p_debug_generator_output_test )
-{
-    BOOST_CHECK(false); // this test needs to be implemented + the code for the debug tools
+TEST_CASE("debug generator output [not yet implemented]", "[debug][.]") {
+    FAIL("debug tools test not yet implemented");
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE_END()

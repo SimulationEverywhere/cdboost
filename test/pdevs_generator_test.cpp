@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013-2015, Damian Vicino
+ * Copyright (c) 2013-present, Damian Vicino
  * Carleton University, Universite de Nice-Sophia Antipolis
  * All rights reserved.
  *
@@ -24,56 +24,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-#include <boost/simulation/pdevs/basic_models/generator.hpp>
 #include <boost/rational.hpp>
-#include <boost/any.hpp>
 
-using namespace boost::simulation;
-using namespace boost::simulation::pdevs;
-using namespace boost::simulation::pdevs::basic_models;
-using namespace std;
+#include <any>
+#include <catch2/catch_test_macros.hpp>
+#include <cdboost/pdevs/basic_models/generator.hpp>
+#include <cdboost/rational_time.hpp>
 
-using Time=boost::rational<int>;
-using Message=boost::any;
+using namespace cdboost::pdevs::basic_models;
 
-BOOST_AUTO_TEST_SUITE( p_generator_test_suite )
-BOOST_AUTO_TEST_CASE( p_generator_init_test )
-{
-    //Create a generator with step 1 and obtain the ta=1;
+using Time    = boost::rational<int>;
+using Message = std::any;
+
+TEST_CASE("generator initial time advance equals period", "[generator]") {
     generator<Time, Message> a(Time{1});
-    BOOST_CHECK_EQUAL( a.advance(), Time{1});
+    CHECK(a.advance() == Time{1});
 }
 
-BOOST_AUTO_TEST_CASE( p_generator_tick_test )
-{
-    //Create different step generators
-    //check that advance always match the step after internal transitions
-    for (int i=1; i < 100; i++){
+TEST_CASE("generator advance always matches period after internal transitions", "[generator]") {
+    for (int i = 1; i < 100; i++) {
         Time t = Time(i);
-        for (int j=1; j < 100; j++){
-            generator<Time, Message> a(t);
-            BOOST_CHECK_EQUAL(boost::any_cast<int>(a.out()[0]), 1);
-            a.internal();
-            BOOST_CHECK_EQUAL( a.advance(),t);
-        }
+        generator<Time, Message> a(t);
+        CHECK(std::any_cast<int>(a.out()[0]) == 1);
+        a.internal();
+        CHECK(a.advance() == t);
     }
 }
 
-BOOST_AUTO_TEST_CASE( p_generator_output_value_test )
-{
-    //Create a generator with  a custom out value
-    //Check the output is always the preset value
+TEST_CASE("generator always outputs the preset value", "[generator]") {
     Time t(1);
     generator<Time, Message> a(t, 5);
-    for (int j=1; j < 100; j++){
-        BOOST_CHECK_EQUAL(boost::any_cast<int>(a.out()[0]), 5);
+    for (int j = 1; j < 100; j++) {
+        CHECK(std::any_cast<int>(a.out()[0]) == 5);
         a.internal();
-        BOOST_CHECK_EQUAL( a.advance(),t);
+        CHECK(a.advance() == t);
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-
