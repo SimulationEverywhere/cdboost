@@ -201,7 +201,8 @@ namespace cdboost {
                 // init all submodels and find next transition time
                 _next = infinity;
                 if (_model != nullptr) { // if need to simulate a model
-                    _next = _last + _model->advance();
+                    auto adv = _model->advance();
+                    _next    = (adv == infinity) ? infinity : _last + adv;
                 } else { // if need to run a pure coordinator
                     // init submodles and queue them if next internal event is not infinity
                     for (auto &c : _subcoordinators) {
@@ -242,20 +243,23 @@ namespace cdboost {
                     if (_inbox.empty()) {
                         if (t == _next) {
                             _model->internal();
-                            _last = t;
-                            _next = _last + _model->advance();
+                            _last    = t;
+                            auto adv = _model->advance();
+                            _next    = (adv == infinity) ? infinity : _last + adv;
                         } else {
                             _last = t;
                         }
                     } else {
                         if (t == _next) { // confluence
                             _model->confluence(_inbox, t - _last);
-                            _last = t;
-                            _next = _last + _model->advance();
+                            _last    = t;
+                            auto adv = _model->advance();
+                            _next    = (adv == infinity) ? infinity : _last + adv;
                         } else { // external
                             _model->external(_inbox, t - _last);
-                            _last = t;
-                            _next = _last + _model->advance();
+                            _last    = t;
+                            auto adv = _model->advance();
+                            _next    = (adv == infinity) ? infinity : _last + adv;
                         }
                     }
                 } else { // if coordinator is pure and no model is simulated
@@ -465,7 +469,8 @@ namespace cdboost {
                 // init all submodels and find next transition time.
                 _next = infinity;
                 if (_model != nullptr) { // if need to simulate a model
-                    _next = _last + _model->advance();
+                    auto adv = _model->advance();
+                    _next    = (adv == infinity) ? infinity : _last + adv;
                 } else { // if need to run a pure coordinator
                     for (auto &c : _subcoordinators) {
                         TIME next = c->init(t);
@@ -496,8 +501,9 @@ namespace cdboost {
                     if (_inbox.empty()) {
                         if (t == _next) {
                             _model->internal();
-                            _last = t;
-                            _next = _last + _model->advance();
+                            _last    = t;
+                            auto adv = _model->advance();
+                            _next    = (adv == infinity) ? infinity : _last + adv;
                             // SWO_PrintString(("\t model->internal() model->advance(): " +
                             // _model->advance().as_string() + " \n").c_str());
                         } else {
@@ -507,13 +513,15 @@ namespace cdboost {
                     } else {
                         if (t == _next) { // confluence
                             _model->confluence(_inbox, t - _last);
-                            _last = t;
-                            _next = _last + _model->advance();
+                            _last    = t;
+                            auto adv = _model->advance();
+                            _next    = (adv == infinity) ? infinity : _last + adv;
                             // SWO_PrintString("\t model->confluent() model->advance() \n");
                         } else { // external
                             _model->external(_inbox, t - _last);
-                            _last = t;
-                            _next = _last + _model->advance();
+                            _last    = t;
+                            auto adv = _model->advance();
+                            _next    = (adv == infinity) ? infinity : _last + adv;
                             // SWO_PrintString(("\t model->external() model->advance(): " +
                             // _model->advance().as_string() + " \n").c_str());
                         }
